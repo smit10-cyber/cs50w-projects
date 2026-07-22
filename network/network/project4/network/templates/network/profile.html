@@ -1,0 +1,40 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+  <h2>{{ profile_user.username }}</h2>
+  <p>{{ following_count }} Following | {{ followers_count }} Followers</p>
+
+  {% if user.is_authenticated and user != profile_user %}
+    <form action="{% url 'follow_toggle' profile_user.username %}" method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary mb-3">
+        {% if is_following %}Unfollow{% else %}Follow{% endif %}
+      </button>
+    </form>
+  {% endif %}
+
+  {% for post in page_obj %}
+    <div class="card p-3 mb-3" id="post-{{ post.id }}">
+      <a href="{% url 'profile' post.author.username %}">{{ post.author.username }}</a>
+      {% if post.author == user %}
+        <a href="#" class="edit-link" data-id="{{ post.id }}">Edit</a>
+      {% endif %}
+      <p class="post-content">{{ post.content }}</p>
+      <small>{{ post.created }}</small>
+      <div>
+        <span class="like-btn" data-id="{{ post.id }}">❤ <span class="like-count">{{ post.like_count }}</span></span>
+      </div>
+    </div>
+  {% endfor %}
+
+  <nav>
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+        <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endblock %}
